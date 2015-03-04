@@ -9,26 +9,21 @@
 $ctx = new ZMQContext();
 $front = new ZMQSocket($ctx, ZMQ::SOCKET_REP);
 $back = new ZMQSocket($ctx, ZMQ::SOCKET_PUB);
-//$back->setSockOpt(ZMQ::SUBSCRIBE, 'graphdata');
 $front->bind("tcp://*:5454");
 $back->bind("tcp://*:1337");
 
 $currencyMatrix = array();
-//$read  = $write = array();
 
 while(true) {
-    $msg = $front->recv();
-//    echo $msg;
+    try {
+        $msg = $front->recv();
 
-    $messageArray = json_decode($msg, true);
-            
-    $currencyMatrix[$messageArray['currencyFrom']][$messageArray['currencyTo']] = $messageArray['rate'];
-    $msgout = json_encode($currencyMatrix);
-            
-            echo $msgout;
-            
-    $front->send("OK\n");
-    $back->send($msgout);
-  //  }
+        $messageArray = json_decode($msg, true);
 
+        $currencyMatrix[$messageArray['currencyFrom']][$messageArray['currencyTo']] = $messageArray['rate'];
+        $msgout = json_encode($currencyMatrix);
+
+        $front->send("OK\n");
+        $back->send($msgout);
+    } catch (Exception $e) {}
 }
